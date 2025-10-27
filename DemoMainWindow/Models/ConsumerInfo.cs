@@ -67,10 +67,10 @@ namespace DemoMainWindow
 		{
 			var config = new ConsumerConfig
 			{
-				BootstrapServers = "localhost:9092",
+				BootstrapServers = "kafka-broker-1:9092,kafka-broker-2:9094,kafka-broker-3:9095",
 				GroupId = GroupId,
 				ClientId = _id,
-				AutoOffsetReset = AutoOffsetReset.Latest,
+				AutoOffsetReset = AutoOffsetReset.Earliest,
 				EnableAutoCommit = false,
 				EnableAutoOffsetStore = false
 			};

@@ -26,7 +26,7 @@ namespace DemoMainWindow
 
 			var config = new ProducerConfig
 			{
-				BootstrapServers = "localhost:9092",
+				BootstrapServers = "kafka-broker-1:9092,kafka-broker-2:9094,kafka-broker-3:9095",
 				ClientId = _id,
 				MessageTimeoutMs = 5000,
 				RequestTimeoutMs = 5000,

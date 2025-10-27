@@ -1,0 +1,92 @@
+<UserControl x:Class="DemoMainWindow.ProducerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+	<TabControl>
+		<TabItem Header="Add Producer">
+			<ScrollViewer VerticalScrollBarVisibility="Auto">
+				<StackPanel Margin="20">
+					<!-- Topic -->
+					<TextBox materialDesign:HintAssist.Hint="Topic Name"
+							 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+							 Text="{Binding NewProducerTopic, UpdateSourceTrigger=PropertyChanged}"
+							 Margin="0,10"/>
+
+					<!-- Message Send Interval Range -->
+					<Grid Margin="0,10">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+						<TextBox Grid.Column="0"
+								 materialDesign:HintAssist.Hint="Min Interval (seconds)"
+								 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+								 Text="{Binding NewProducerIntervalMin, UpdateSourceTrigger=PropertyChanged}"/>
+						<TextBlock Grid.Column="1" Text="to" VerticalAlignment="Center" Margin="10,0"/>
+						<TextBox Grid.Column="2"
+								 materialDesign:HintAssist.Hint="Max Interval (seconds)"
+								 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+								 Text="{Binding NewProducerIntervalMax, UpdateSourceTrigger=PropertyChanged}"/>
+					</Grid>
+
+					<!-- Message Template -->
+					<TextBox materialDesign:HintAssist.Hint="Message Template"
+							 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+							 Text="{Binding NewProducerMessageTemplate, UpdateSourceTrigger=PropertyChanged}"
+							 Height="100" AcceptsReturn="True" TextWrapping="Wrap"
+							 VerticalScrollBarVisibility="Auto"
+							 Margin="0,10"/>
+
+					<!-- Button -->
+					<Button Content="Add Producer"
+							Style="{StaticResource MaterialDesignRaisedButton}"
+							Command="{Binding AddProducerCommand}"
+							HorizontalAlignment="Right"
+							Margin="0,20,0,0"/>
+				</StackPanel>
+			</ScrollViewer>
+		</TabItem>
+
+		<TabItem Header="Producer List">
+			<DataGrid ItemsSource="{Binding Producers}"
+					  AutoGenerateColumns="False"
+					  CanUserAddRows="False"
+					  SelectionMode="Single"
+					  Margin="10"
+					  materialDesign:DataGridAssist.CellPadding="8"
+					  materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="200"/>
+					<DataGridTextColumn Header="Topic" Binding="{Binding Topic}" Width="*"/>
+					<DataGridTemplateColumn Header="Interval Range (sec)" Width="150">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<TextBlock>
+									<Run Text="{Binding IntervalMinSeconds, Mode=OneWay}"/>
+									<Run Text=" - "/>
+									<Run Text="{Binding IntervalMaxSeconds, Mode=OneWay}"/>
+								</TextBlock>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridTemplateColumn Header="Action" Width="100">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<Button Content="Delete"
+										Style="{StaticResource MaterialDesignFlatButton}"
+										Command="{Binding DataContext.DeleteProducerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+										CommandParameter="{Binding}"
+										Margin="2"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+				</DataGrid.Columns>
+			</DataGrid>
+		</TabItem>
+	</TabControl>
+</UserControl>

@@ -1,0 +1,177 @@
+<UserControl x:Class="DemoMainWindow.ConsumerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+	<TabControl>
+		<TabItem Header="Consumer Group Management">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<!-- Row 1: Consumer Group List -->
+				<DataGrid Grid.Row="0"
+						  ItemsSource="{Binding ConsumerGroups}"
+						  AutoGenerateColumns="False"
+						  CanUserAddRows="False"
+						  SelectionMode="Single"
+						  Margin="10"
+						  materialDesign:DataGridAssist.CellPadding="8"
+						  materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Group ID" Binding="{Binding GroupId}" Width="200"/>
+						<DataGridTextColumn Header="Topics" Binding="{Binding Topics}" Width="*"/>
+						<DataGridTextColumn Header="Consumer Count" Binding="{Binding ConsumerCount}" Width="120"/>
+						<DataGridTemplateColumn Header="Action" Width="100">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Content="Delete"
+											Style="{StaticResource MaterialDesignFlatButton}"
+											Command="{Binding DataContext.DeleteConsumerGroupCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+											CommandParameter="{Binding}"
+											Margin="2"/>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+
+				<!-- Row 2: Add New Consumer Group -->
+				<GroupBox Grid.Row="1" Header="Add New Consumer Group" Margin="10"
+						  Style="{StaticResource MaterialDesignGroupBox}">
+					<StackPanel Margin="15">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="10"/>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="10"/>
+								<ColumnDefinition Width="Auto"/>
+							</Grid.ColumnDefinitions>
+
+							<TextBox Grid.Column="0"
+									 materialDesign:HintAssist.Hint="Group ID"
+									 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+									 Text="{Binding NewConsumerGroupId, UpdateSourceTrigger=PropertyChanged}"/>
+
+							<TextBox Grid.Column="2"
+									 materialDesign:HintAssist.Hint="Topics (comma-separated)"
+									 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+									 Text="{Binding NewConsumerGroupTopics, UpdateSourceTrigger=PropertyChanged}"/>
+
+							<Button Grid.Column="4"
+									Content="Add Consumer Group"
+									Style="{StaticResource MaterialDesignRaisedButton}"
+									Command="{Binding AddConsumerGroupCommand}"/>
+						</Grid>
+					</StackPanel>
+				</GroupBox>
+			</Grid>
+		</TabItem>
+
+		<TabItem Header="Add Consumer">
+			<ScrollViewer VerticalScrollBarVisibility="Auto">
+				<StackPanel Margin="20">
+					<!-- Consumer Type Selection -->
+					<TextBlock Text="Consumer Type" FontWeight="Bold" Margin="0,0,0,10"/>
+					<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+						<RadioButton Content="Join Consumer Group"
+									 IsChecked="{Binding IsIndependentConsumer, Converter={StaticResource InverseBooleanConverter}}"
+									 Margin="0,0,20,0"/>
+						<RadioButton Content="Independent Consumer"
+									 IsChecked="{Binding IsIndependentConsumer}"/>
+					</StackPanel>
+
+					<!-- Join Consumer Group -->
+					<StackPanel Visibility="{Binding IsIndependentConsumer, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+						<ComboBox materialDesign:HintAssist.Hint="Select Consumer Group"
+								  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+								  ItemsSource="{Binding ConsumerGroups}"
+								  SelectedItem="{Binding SelectedConsumerGroup}"
+								  Margin="0,10">
+							<ComboBox.ItemTemplate>
+								<DataTemplate>
+									<StackPanel>
+										<TextBlock Text="{Binding GroupId}" FontWeight="Bold"/>
+										<TextBlock Text="{Binding Topics}" FontSize="10" Opacity="0.7"/>
+									</StackPanel>
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
+
+						<!-- Display Selected Consumer Group Info -->
+						<Border BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}"
+								BorderThickness="1"
+								CornerRadius="4"
+								Padding="10"
+								Margin="0,10"
+								Visibility="{Binding SelectedConsumerGroup, Converter={StaticResource NullToVisibilityConverter}}">
+							<StackPanel>
+								<TextBlock Text="Selected Consumer Group Info" FontWeight="Bold" Margin="0,0,0,5"/>
+								<TextBlock>
+									<Run Text="Group ID: "/>
+									<Run Text="{Binding SelectedConsumerGroup.GroupId, Mode=OneWay}" FontWeight="Bold"/>
+								</TextBlock>
+								<TextBlock>
+									<Run Text="Topics: "/>
+									<Run Text="{Binding SelectedConsumerGroup.Topics, Mode=OneWay}" FontWeight="Bold"/>
+								</TextBlock>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+
+					<!-- Independent Consumer -->
+					<StackPanel Visibility="{Binding IsIndependentConsumer, Converter={StaticResource BoolToVisibilityConverter}}">
+						<TextBox materialDesign:HintAssist.Hint="Topics (comma-separated)"
+								 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+								 Text="{Binding NewConsumerTopics, UpdateSourceTrigger=PropertyChanged}"
+								 Margin="0,10"/>
+						<TextBlock Text="Independent consumers will use unique Group ID"
+								   FontSize="10"
+								   Opacity="0.7"
+								   Margin="5,0,0,0"/>
+					</StackPanel>
+
+					<!-- Button -->
+					<Button Content="Add Consumer"
+							Style="{StaticResource MaterialDesignRaisedButton}"
+							Command="{Binding AddConsumerCommand}"
+							HorizontalAlignment="Right"
+							Margin="0,20,0,0"/>
+				</StackPanel>
+			</ScrollViewer>
+		</TabItem>
+
+		<TabItem Header="Consumer List">
+			<DataGrid ItemsSource="{Binding Consumers}"
+					  AutoGenerateColumns="False"
+					  CanUserAddRows="False"
+					  SelectionMode="Single"
+					  Margin="10"
+					  materialDesign:DataGridAssist.CellPadding="8"
+					  materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="200"/>
+					<DataGridTextColumn Header="Topics" Binding="{Binding Topics}" Width="*"/>
+					<DataGridTextColumn Header="Consumer Group" Binding="{Binding GroupId}" Width="200"/>
+					<DataGridTemplateColumn Header="Action" Width="100">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<Button Content="Delete"
+										Style="{StaticResource MaterialDesignFlatButton}"
+										Command="{Binding DataContext.DeleteConsumerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+										CommandParameter="{Binding}"
+										Margin="2"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+				</DataGrid.Columns>
+			</DataGrid>
+		</TabItem>
+	</TabControl>
+</UserControl>

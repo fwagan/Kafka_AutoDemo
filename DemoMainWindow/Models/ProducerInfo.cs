@@ -18,6 +18,7 @@ namespace DemoMainWindow
 		private int _intervalMinSeconds = 1;
 		private int _intervalMaxSeconds = 5;
 		private string _messageTemplate = string.Empty;
+		private int _messagesSent = 0;
 
 		public ProducerInfo(ILogger logger, string id)
 		{
@@ -92,6 +93,16 @@ namespace DemoMainWindow
 			}
 		}
 
+		public int MessagesSent
+		{
+			get => _messagesSent;
+			private set
+			{
+				_messagesSent = value;
+				OnPropertyChanged();
+			}
+		}
+
 		string ILoggerDataSource.Name => $"Producer-{Topic}:{Id}";
 
 		public void Start()
@@ -143,6 +154,7 @@ namespace DemoMainWindow
 
 				if (deliveryResult.Status == PersistenceStatus.Persisted)
 				{
+					MessagesSent++;
 					_logger.LogInformation(this, $"Message sent: Partition={deliveryResult.Partition.Value}, Offset={deliveryResult.Offset.Value}, Message={message}");
 				}
 				else

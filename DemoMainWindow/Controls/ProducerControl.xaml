@@ -61,7 +61,7 @@
 					  materialDesign:DataGridAssist.CellPadding="8"
 					  materialDesign:DataGridAssist.ColumnHeaderPadding="8">
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="200"/>
+					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100"/>
 					<DataGridTextColumn Header="Topic" Binding="{Binding Topic}" Width="*"/>
 					<DataGridTemplateColumn Header="Interval Range (sec)" Width="150">
 						<DataGridTemplateColumn.CellTemplate>
@@ -74,6 +74,7 @@
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
+					<DataGridTextColumn Header="Messages Sent" Binding="{Binding MessagesSent}" Width="120"/>
 					<DataGridTemplateColumn Header="Action" Width="100">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>

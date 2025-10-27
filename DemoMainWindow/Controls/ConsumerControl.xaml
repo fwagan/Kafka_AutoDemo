@@ -27,6 +27,7 @@
 						<DataGridTextColumn Header="Group ID" Binding="{Binding GroupId}" Width="200"/>
 						<DataGridTextColumn Header="Topics" Binding="{Binding Topics}" Width="*"/>
 						<DataGridTextColumn Header="Consumer Count" Binding="{Binding ConsumerCount}" Width="120"/>
+						<DataGridTextColumn Header="Total Messages" Binding="{Binding TotalMessagesProcessed}" Width="120"/>
 						<DataGridTemplateColumn Header="Action" Width="100">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
@@ -156,9 +157,11 @@
 					  materialDesign:DataGridAssist.CellPadding="8"
 					  materialDesign:DataGridAssist.ColumnHeaderPadding="8">
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="200"/>
+					<DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100"/>
 					<DataGridTextColumn Header="Topics" Binding="{Binding Topics}" Width="*"/>
 					<DataGridTextColumn Header="Consumer Group" Binding="{Binding GroupId}" Width="200"/>
+					<DataGridTextColumn Header="Assigned Partitions" Binding="{Binding AssignedPartitions}" Width="200"/>
+					<DataGridTextColumn Header="Messages Processed" Binding="{Binding MessagesProcessed}" Width="140"/>
 					<DataGridTemplateColumn Header="Action" Width="100">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DemoMainWindow"
         mc:Ignorable="d"
-        Title="Kafka Test Center" Height="800" Width="1400">
+        Title="Kafka Test Center" Height="1000" Width="2000">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
@@ -14,10 +14,14 @@
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
 			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<!-- Top Left - Producer Message Output -->
-		<Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="5">
+		<!-- Top Left (3 columns) - Producer Message Output -->
+		<Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1" Margin="5">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"/>
@@ -28,8 +32,8 @@
 			</Grid>
 		</Border>
 
-		<!-- Top Right - Consumer Message Output -->
-		<Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5">
+		<!-- Top Right (3 columns) - Consumer Message Output -->
+		<Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1" Margin="5">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"/>
@@ -40,8 +44,8 @@
 			</Grid>
 		</Border>
 
-		<!-- Bottom Left - Producer Control -->
-		<Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="5">
+		<!-- Bottom Left (2 columns) - Producer Control -->
+		<Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"/>
@@ -52,8 +56,20 @@
 			</Grid>
 		</Border>
 
-		<!-- Bottom Right - Consumer Control -->
-		<Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5">
+		<!-- Bottom Middle (2 columns) - Topic Watch -->
+		<Border Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				<TextBlock Grid.Row="0" Text="Topic Watch" FontWeight="Bold" Margin="5"/>
+				<local:TopicWatchControl Grid.Row="1"/>
+			</Grid>
+		</Border>
+
+		<!-- Bottom Right (2 columns) - Consumer Control -->
+		<Border Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"/>

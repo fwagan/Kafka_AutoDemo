@@ -8,6 +8,7 @@ namespace DemoMainWindow
 		private string _groupId;
 		private string _topics = string.Empty;
 		private int _consumerCount = 0;
+		private int _totalMessagesProcessed = 0;
 
 		public ConsumerGroup(string groupId, string topics)
 		{
@@ -41,6 +42,16 @@ namespace DemoMainWindow
 			set
 			{
 				_consumerCount = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public int TotalMessagesProcessed
+		{
+			get => _totalMessagesProcessed;
+			set
+			{
+				_totalMessagesProcessed = value;
 				OnPropertyChanged();
 			}
 		}

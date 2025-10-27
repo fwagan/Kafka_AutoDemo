@@ -21,6 +21,7 @@ namespace DemoMainWindow
 			Producers = new ObservableCollection<ProducerInfo>();
 			Consumers = new ObservableCollection<ConsumerInfo>();
 			ConsumerGroups = new ObservableCollection<ConsumerGroup>();
+			TopicWatches = new ObservableCollection<TopicWatch>();
 
 			AddProducerCommand = new RelayCommand(AddProducer);
 			DeleteProducerCommand = new RelayCommand<ProducerInfo>(DeleteProducer);
@@ -167,6 +168,7 @@ namespace DemoMainWindow
 		public ObservableCollection<ProducerInfo> Producers { get; }
 		public ObservableCollection<ConsumerInfo> Consumers { get; }
 		public ObservableCollection<ConsumerGroup> ConsumerGroups { get; }
+		public ObservableCollection<TopicWatch> TopicWatches { get; }
 
 		public ICommand AddProducerCommand { get; }
 		public ICommand DeleteProducerCommand { get; }
@@ -247,6 +249,9 @@ namespace DemoMainWindow
 		{
 			string groupId;
 			string topics;
+			ConsumerGroup? consumerGroup = null;
+
+			var id = GetNextConsumerId();
 
 			if (IsIndependentConsumer)
 			{
@@ -256,8 +261,11 @@ namespace DemoMainWindow
 					return;
 				}
 
-				groupId = $"Standalone-{Guid.NewGuid()}";
+				groupId = $"Auto-{id}";
 				topics = NewConsumerTopics;
+
+				consumerGroup = new ConsumerGroup(groupId, topics);
+				ConsumerGroups.Add(consumerGroup);
 			}
 			else
 			{
@@ -269,18 +277,30 @@ namespace DemoMainWindow
 
 				groupId = SelectedConsumerGroup.GroupId;
 				topics = SelectedConsumerGroup.Topics;
-				SelectedConsumerGroup.ConsumerCount++;
+				consumerGroup = SelectedConsumerGroup;
+				consumerGroup.ConsumerCount++;
 			}
 
-			var id = GetNextConsumerId();
 			var logger = _consumerLoggerProvider.CreateLogger("Consumer", $"{groupId}:{topics}");
 
 			var consumer = new ConsumerInfo(logger, id)
 			{
 				Topics = topics,
 				GroupId = groupId,
+				ConsumerGroup = consumerGroup
 			};
+			consumer.MessageProcessed += OnConsumerMessageProcessed;
 			Consumers.Add(consumer);
+
+			var topicArray = topics.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
+			foreach (var topic in topicArray)
+			{
+				var key = $"{groupId}|{topic}";
+				if (!TopicWatches.Any(tw => tw.Key == key))
+				{
+					TopicWatches.Add(new TopicWatch(groupId, topic));
+				}
+			}
 
 			consumer.Start();
 
@@ -290,10 +310,21 @@ namespace DemoMainWindow
 			}
 		}
 
+		private void OnConsumerMessageProcessed(object? sender, MessageProcessedEventArgs e)
+		{
+			var key = $"{e.GroupId}|{e.Topic}";
+			var watch = TopicWatches.FirstOrDefault(tw => tw.Key == key);
+			if (watch != null)
+			{
+				watch.IncrementMessagesProcessed();
+			}
+		}
+
 		private async void DeleteConsumer(ConsumerInfo? consumer)
 		{
 			if (consumer != null)
 			{
+				consumer.MessageProcessed -= OnConsumerMessageProcessed;
 				await consumer.StopAsync();
 
 				var group = ConsumerGroups.FirstOrDefault(g => g.GroupId == consumer.GroupId);
@@ -303,6 +334,22 @@ namespace DemoMainWindow
 				}
 
 				Consumers.Remove(consumer);
+
+				var topicArray = consumer.Topics.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
+				foreach (var topic in topicArray)
+				{
+					var key = $"{consumer.GroupId}|{topic}";
+					var hasOtherConsumers = Consumers.Any(c => c.GroupId == consumer.GroupId && c.Topics.Split(',').Select(t => t.Trim()).Contains(topic));
+					if (!hasOtherConsumers)
+					{
+						var watch = TopicWatches.FirstOrDefault(tw => tw.Key == key);
+						if (watch != null)
+						{
+							watch.Dispose();
+							TopicWatches.Remove(watch);
+						}
+					}
+				}
 			}
 		}
 

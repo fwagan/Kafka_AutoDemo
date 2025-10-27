@@ -16,11 +16,24 @@ namespace DemoMainWindow
 		private string _topics = string.Empty;
 		private string _groupId = string.Empty;
 		private string[]? _topicArrayCache;
+		private int _messagesProcessed = 0;
+		private string _assignedPartitions = string.Empty;
+		private ConsumerGroup? _consumerGroup;
 
 		public ConsumerInfo(ILogger logger, string id)
 		{
 			_logger = logger;
 			_id = id;
+		}
+
+		public ConsumerGroup? ConsumerGroup
+		{
+			get => _consumerGroup;
+			set
+			{
+				_consumerGroup = value;
+				OnPropertyChanged();
+			}
 		}
 
 		public string Id
@@ -61,7 +74,29 @@ namespace DemoMainWindow
 			}
 		}
 
+		public int MessagesProcessed
+		{
+			get => _messagesProcessed;
+			private set
+			{
+				_messagesProcessed = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public string AssignedPartitions
+		{
+			get => _assignedPartitions;
+			private set
+			{
+				_assignedPartitions = value;
+				OnPropertyChanged();
+			}
+		}
+
 		string ILoggerDataSource.Name => $"Consumer-{Topics}:{Id}";
+
+		public event EventHandler<MessageProcessedEventArgs>? MessageProcessed;
 
 		public void Start()
 		{
@@ -77,7 +112,17 @@ namespace DemoMainWindow
 
 			try
 			{
-				_consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+				_consumer = new ConsumerBuilder<Ignore, string>(config)
+					.SetPartitionsAssignedHandler((c, partitions) =>
+					{
+						AssignedPartitions = string.Join(", ", partitions.Select(p => $"{p.Topic}:{p.Partition.Value}"));
+						_logger.LogInformation(this, $"Partitions assigned: {AssignedPartitions}");
+					})
+					.SetPartitionsRevokedHandler((c, partitions) =>
+					{
+						_logger.LogWarning(this, $"Partitions revoked: {string.Join(", ", partitions.Select(p => $"{p.Topic}:{p.Partition.Value}"))}");
+					})
+					.Build();
 				_consumer.Subscribe(TopicArray);
 
 				_cancellationTokenSource = new CancellationTokenSource();
@@ -141,6 +186,12 @@ namespace DemoMainWindow
 
 						if (consumeResult != null)
 						{
+							MessagesProcessed++;
+							if (ConsumerGroup != null)
+							{
+								ConsumerGroup.TotalMessagesProcessed++;
+							}
+							MessageProcessed?.Invoke(this, new MessageProcessedEventArgs(GroupId, consumeResult.Topic));
 							_logger.LogInformation(this, $"Comsuming message: Topic={consumeResult.Topic}, Partition={consumeResult.Partition.Value}, Offset={consumeResult.Offset.Value}, Message={consumeResult.Message.Value}");
 
 							await ProcessMessageAsync(cancellationToken);
